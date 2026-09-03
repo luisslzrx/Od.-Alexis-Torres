@@ -1,0 +1,73 @@
+---
+// Componente de aviso y consentimiento de cookies
+---
+
+<div
+  id="cookie-consent-banner"
+  class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 z-50 max-w-md rounded-2xl bg-[#0D214B]/95 text-white p-4 sm:p-5 shadow-2xl backdrop-blur-xl border border-white/15 transition-all duration-300 translate-y-24 opacity-0 pointer-events-none"
+  role="region"
+  aria-label="Aviso de cookies"
+>
+  <div class="flex items-start gap-3">
+    <div class="rounded-xl bg-white/10 p-2 text-[#4E8C41] shrink-0">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+        <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 16.93a8 8 0 01-7.93-7.93A8 8 0 0112 3.07a8 8 0 018.93 7.93 1 1 0 00-1 1 2 2 0 01-2 2 1 1 0 00-1 1 2 2 0 01-2 2 1 1 0 00-1 1 2 2 0 01-1.93 0z" />
+      </svg>
+    </div>
+    <div class="flex-1 text-xs sm:text-sm text-slate-200 leading-relaxed">
+      <p>
+        Utilizamos cookies técnicas y analíticas para garantizar el funcionamiento del sitio y mejorar tu experiencia. Conoce nuestra <a href="/politica-de-privacidad" class="text-white font-semibold underline hover:text-[#4E8C41] transition-colors">Política de Privacidad y Cookies</a>.
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-4 flex items-center justify-end gap-2.5">
+    <button
+      id="btn-cookie-decline"
+      type="button"
+      class="rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer"
+    >
+      Solo esenciales
+    </button>
+    <button
+      id="btn-cookie-accept"
+      type="button"
+      class="rounded-full bg-[#4E8C41] hover:bg-[#3f7335] text-white px-5 py-1.5 text-xs font-semibold shadow-sm transition-all cursor-pointer active:scale-95"
+    >
+      Aceptar todas
+    </button>
+  </div>
+</div>
+
+<script>
+  const COOKIE_KEY = "od_alexis_cookie_consent";
+  const banner = document.getElementById("cookie-consent-banner");
+  const acceptBtn = document.getElementById("btn-cookie-accept");
+  const declineBtn = document.getElementById("btn-cookie-decline");
+
+  function showBanner() {
+    if (!banner) return;
+    banner.classList.remove("translate-y-24", "opacity-0", "pointer-events-none");
+    banner.classList.add("translate-y-0", "opacity-100", "pointer-events-auto");
+  }
+
+  function hideBanner() {
+    if (!banner) return;
+    banner.classList.add("translate-y-24", "opacity-0", "pointer-events-none");
+    banner.classList.remove("translate-y-0", "opacity-100", "pointer-events-auto");
+  }
+
+  if (!localStorage.getItem(COOKIE_KEY)) {
+    setTimeout(showBanner, 1000);
+  }
+
+  acceptBtn?.addEventListener("click", () => {
+    localStorage.setItem(COOKIE_KEY, "all");
+    hideBanner();
+  });
+
+  declineBtn?.addEventListener("click", () => {
+    localStorage.setItem(COOKIE_KEY, "essential");
+    hideBanner();
+  });
+</script>

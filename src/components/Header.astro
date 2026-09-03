@@ -1,0 +1,492 @@
+---
+
+---
+
+<!-- Navbar Header: Logo & CTA button scroll away with page, while Nav capsule stays fixed / sticky -->
+<header
+  id="main-header"
+  class="fixed top-0 left-0 right-0 z-40 w-full p-2 sm:p-3 pointer-events-none transition-all duration-300"
+>
+  <nav
+    id="mobile-nav-bar"
+    class="relative z-40 flex items-center justify-between gap-3 w-full px-4 py-3 sm:px-6 sm:py-3.5 rounded-2xl transition-all duration-300 pointer-events-auto max-w-7xl mx-auto"
+  >
+    <!-- Logo (Scrolls naturally with page) -->
+    <a
+      href="/#inicio"
+      class="flex shrink-0 items-center gap-2 text-white group"
+    >
+      <img
+        src="/logo.png"
+        alt="Logo Od. Alexis Torres"
+        class="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 object-contain transition-transform group-hover:scale-105"
+      />
+      <span class="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">Od. Alexis Torres</span>
+    </a>
+
+    <!-- Invisible placeholder for flex spacing balance on desktop -->
+    <div class="hidden lg:block w-96 pointer-events-none" aria-hidden="true"></div>
+
+    <!-- CTA Button: SOLO VISIBLE EN ESCRITORIO (lg:flex), OCULTO EN CELULARES -->
+    <div class="hidden items-center gap-4 lg:flex">
+      <a
+        href="/#doctor"
+        class="rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-[#0D214B] shadow-md transition-all hover:scale-105 hover:bg-slate-100 active:scale-95"
+      >
+        Agenda tu cita
+      </a>
+    </div>
+
+    <!-- Mobile Hamburger Button -->
+    <button
+      id="hero-menu-toggle"
+      type="button"
+      aria-label="Abrir menú de navegación"
+      aria-expanded="false"
+      class="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/10 border border-white/20 text-white backdrop-blur-md lg:hidden hover:bg-white/20 transition-all cursor-pointer active:scale-90 shadow-sm"
+    >
+      <svg
+        id="hero-icon-open"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        class="h-5 w-5 sm:h-6 sm:w-6"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M4 6h16M4 12h16M4 18h16"
+        />
+      </svg>
+      <svg
+        id="hero-icon-close"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        class="hidden h-5 w-5 sm:h-6 sm:w-6"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+  </nav>
+
+  <!-- Backdrop overlay para cerrar el menú al tocar afuera en móviles -->
+  <div
+    id="hero-mobile-backdrop"
+    class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-30 hidden lg:hidden transition-opacity"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Mobile Dropdown Menu (Sin botón de agendar cita, solo links de navegación) -->
+  <div
+    id="hero-mobile-menu"
+    class="pointer-events-auto hidden lg:hidden w-full max-w-sm mx-auto mt-2 rounded-2xl bg-[#0D214B]/95 backdrop-blur-xl border border-white/15 p-4 shadow-2xl relative z-40 transition-all"
+  >
+    <ul class="flex flex-col gap-1.5">
+      <li>
+        <a
+          href="/#inicio"
+          data-mobile-nav="inicio"
+          class="hero-mobile-link is-active flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-colors"
+        >
+          <span>Inicio</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 opacity-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a
+          href="/#nosotros"
+          data-mobile-nav="nosotros"
+          class="hero-mobile-link flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-colors"
+        >
+          <span>Nosotros</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 opacity-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a
+          href="/#servicios"
+          data-mobile-nav="servicios"
+          class="hero-mobile-link flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-colors"
+        >
+          <span>Servicios</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 opacity-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a
+          href="/#testimonios"
+          data-mobile-nav="testimonios"
+          class="hero-mobile-link flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-colors"
+        >
+          <span>Testimonios</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 opacity-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a
+          href="/#contacto"
+          data-mobile-nav="contacto"
+          class="hero-mobile-link flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-colors"
+        >
+          <span>Contacto</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 opacity-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<!-- FIXED / STICKY CENTER NAVIGATION CAPSULE -->
+<!-- Stays pinned at the top center across all sections while logo & CTA scroll naturally -->
+<nav
+  id="floating-nav-wrapper"
+  class="fixed top-6 sm:top-7 left-1/2 -translate-x-1/2 z-50 pointer-events-auto transition-transform duration-300"
+  aria-label="Navegación principal"
+>
+  <ul
+    id="desktop-nav-links"
+    class="relative hidden items-center rounded-full lg:flex bg-[#0D214B]/90 backdrop-blur-xl p-1 border border-white/20 shadow-2xl select-none"
+  >
+    <!-- Sliding White Capsule Indicator -->
+    <div
+      id="nav-indicator"
+      class="absolute rounded-full bg-white shadow-sm pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] z-0"
+      style="opacity: 0;"
+      aria-hidden="true"
+    >
+    </div>
+
+    <li class="relative z-10">
+      <a
+        href="/#inicio"
+        data-nav="inicio"
+        class="nav-link is-active block rounded-full px-5 py-2 text-sm font-semibold transition-colors duration-200 cursor-pointer"
+      >
+        Inicio
+      </a>
+    </li>
+    <li class="relative z-10">
+      <a
+        href="/#nosotros"
+        data-nav="nosotros"
+        class="nav-link block rounded-full px-5 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer"
+      >
+        Nosotros
+      </a>
+    </li>
+    <li class="relative z-10">
+      <a
+        href="/#servicios"
+        data-nav="servicios"
+        class="nav-link block rounded-full px-5 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer"
+      >
+        Servicios
+      </a>
+    </li>
+    <li class="relative z-10">
+      <a
+        href="/#testimonios"
+        data-nav="testimonios"
+        class="nav-link block rounded-full px-5 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer"
+      >
+        Testimonios
+      </a>
+    </li>
+    <li class="relative z-10">
+      <a
+        href="/#contacto"
+        data-nav="contacto"
+        class="nav-link block rounded-full px-5 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer"
+      >
+        Contacto
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<style>
+  .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    transition: color 0.15s ease-in-out;
+  }
+  .nav-link:hover,
+  .nav-link.is-active {
+    color: #000000 !important;
+    font-weight: 600;
+  }
+
+  /* Estilos para los links del menú móvil */
+  .hero-mobile-link {
+    color: rgba(255, 255, 255, 0.85);
+    transition: all 0.2s ease-in-out;
+  }
+  .hero-mobile-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+  .hero-mobile-link.is-active {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+  .hero-mobile-link.is-active span,
+  .hero-mobile-link.is-active * {
+    color: #000000 !important;
+  }
+  .hero-mobile-link.is-active svg {
+    color: #000000 !important;
+    stroke: #000000 !important;
+    opacity: 1 !important;
+  }
+</style>
+
+<script>
+  // Mobile drawer toggle
+  const menuBtn = document.getElementById("hero-menu-toggle");
+  const mobileMenu = document.getElementById("hero-mobile-menu");
+  const mobileBackdrop = document.getElementById("hero-mobile-backdrop");
+  const iconOpen = document.getElementById("hero-icon-open");
+  const iconClose = document.getElementById("hero-icon-close");
+  const mobileLinks = document.querySelectorAll<HTMLAnchorElement>(".hero-mobile-link");
+  const mobileNavBar = document.getElementById("mobile-nav-bar");
+
+  function openMenu() {
+    mobileMenu?.classList.remove("hidden");
+    mobileBackdrop?.classList.remove("hidden");
+    iconOpen?.classList.add("hidden");
+    iconClose?.classList.remove("hidden");
+    menuBtn?.setAttribute("aria-expanded", "true");
+  }
+
+  function closeMenu() {
+    mobileMenu?.classList.add("hidden");
+    mobileBackdrop?.classList.add("hidden");
+    iconOpen?.classList.remove("hidden");
+    iconClose?.classList.add("hidden");
+    menuBtn?.setAttribute("aria-expanded", "false");
+  }
+
+  menuBtn?.addEventListener("click", () => {
+    const isClosed = mobileMenu?.classList.contains("hidden");
+    if (isClosed) {
+      openMenu();
+    } else {
+      closeMenu();
+    }
+  });
+
+  mobileBackdrop?.addEventListener("click", closeMenu);
+
+  mobileLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      const navId = link.getAttribute("data-mobile-nav");
+      if (navId) {
+        currentActiveId = navId;
+        updateMobileLinks(navId);
+      }
+      closeMenu();
+    });
+  });
+
+  // Close on Escape key
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeMenu();
+    }
+  });
+
+  // Scroll handler to adapt mobile nav bar background
+  function handleMobileNavScroll() {
+    if (window.scrollY > 40) {
+      mobileNavBar?.classList.add("bg-[#0D214B]/90", "backdrop-blur-xl", "shadow-lg", "border", "border-white/10");
+    } else {
+      mobileNavBar?.classList.remove("bg-[#0D214B]/90", "backdrop-blur-xl", "shadow-lg", "border", "border-white/10");
+    }
+  }
+
+  window.addEventListener("scroll", handleMobileNavScroll, { passive: true });
+  handleMobileNavScroll();
+
+  // Desktop Sliding Indicator Animation
+  const navContainer = document.getElementById("desktop-nav-links");
+  const navIndicator = document.getElementById("nav-indicator");
+  const desktopLinks = document.querySelectorAll<HTMLAnchorElement>(".nav-link");
+
+  let currentActiveId = "inicio";
+  let isHovering = false;
+
+  function updateMobileLinks(activeId: string) {
+    mobileLinks.forEach((link) => {
+      const targetId = link.getAttribute("data-mobile-nav");
+      if (targetId === activeId) {
+        link.classList.add("is-active");
+      } else {
+        link.classList.remove("is-active");
+      }
+    });
+  }
+
+  function moveIndicatorTo(targetLink: HTMLElement | null, instant = false) {
+    if (!targetLink || !navIndicator || !navContainer) return;
+
+    const linkRect = targetLink.getBoundingClientRect();
+    const containerRect = navContainer.getBoundingClientRect();
+
+    const left = linkRect.left - containerRect.left;
+    const top = linkRect.top - containerRect.top;
+    const width = linkRect.width;
+    const height = linkRect.height;
+
+    if (instant) {
+      navIndicator.style.transition = "none";
+    } else {
+      navIndicator.style.transition = "all 0.3s cubic-bezier(0.22, 1, 0.36, 1)";
+    }
+
+    navIndicator.style.left = `${left}px`;
+    navIndicator.style.top = `${top}px`;
+    navIndicator.style.width = `${width}px`;
+    navIndicator.style.height = `${height}px`;
+    navIndicator.style.opacity = "1";
+
+    if (instant) {
+      // Force reflow
+      navIndicator.offsetHeight;
+      navIndicator.style.transition = "";
+    }
+
+    // Ensure the hovered/selected item turns pure black (#000000) for maximum clarity
+    desktopLinks.forEach((link) => {
+      if (link === targetLink) {
+        link.classList.add("is-active");
+        link.style.color = "#000000";
+        link.style.fontWeight = "600";
+      } else {
+        link.classList.remove("is-active");
+        link.style.color = "rgba(255, 255, 255, 0.85)";
+        link.style.fontWeight = "500";
+      }
+    });
+  }
+
+  function getActiveLinkElement(id: string): HTMLAnchorElement | null {
+    const found = Array.from(desktopLinks).find(
+      (link) => link.getAttribute("data-nav") === id
+    );
+    return found || null;
+  }
+
+  // Hover sliding interaction: when pointer moves, hovered link becomes black & indicator slides
+  desktopLinks.forEach((link) => {
+    link.addEventListener("mouseenter", () => {
+      isHovering = true;
+      moveIndicatorTo(link);
+    });
+
+    link.addEventListener("click", () => {
+      const navId = link.getAttribute("data-nav");
+      if (navId) {
+        currentActiveId = navId;
+        updateMobileLinks(navId);
+      }
+      moveIndicatorTo(link);
+    });
+  });
+
+  navContainer?.addEventListener("mouseleave", () => {
+    isHovering = false;
+    const activeLink = getActiveLinkElement(currentActiveId);
+    if (activeLink) {
+      moveIndicatorTo(activeLink);
+    }
+  });
+
+  // Initial positioning on load
+  function initPosition() {
+    const initialLink = getActiveLinkElement(currentActiveId) || desktopLinks[0];
+    if (initialLink) {
+      moveIndicatorTo(initialLink, true);
+    }
+    updateMobileLinks(currentActiveId);
+  }
+
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    setTimeout(initPosition, 60);
+  } else {
+    document.addEventListener("DOMContentLoaded", initPosition);
+  }
+
+  // Recalculate on window resize
+  window.addEventListener("resize", () => {
+    const targetLink = isHovering
+      ? null
+      : getActiveLinkElement(currentActiveId) || desktopLinks[0];
+    if (targetLink) {
+      moveIndicatorTo(targetLink, true);
+    }
+  });
+
+  // Active section tracking on scroll
+  const sectionIds = ["inicio", "nosotros", "servicios", "testimonios", "contacto"];
+
+  let isTicking = false;
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!isTicking) {
+        window.requestAnimationFrame(() => {
+          const scrollPosition = window.scrollY + 200;
+          let newSection = sectionIds[0];
+
+          for (const id of sectionIds) {
+            const section = document.getElementById(id);
+            if (section) {
+              const top = section.offsetTop;
+              const height = section.offsetHeight;
+              if (scrollPosition >= top && scrollPosition < top + height) {
+                newSection = id;
+                break;
+              } else if (scrollPosition >= top) {
+                newSection = id;
+              }
+            }
+          }
+
+          if (newSection !== currentActiveId) {
+            currentActiveId = newSection;
+            updateMobileLinks(newSection);
+            if (!isHovering) {
+              const activeLink = getActiveLinkElement(currentActiveId);
+              if (activeLink) {
+                moveIndicatorTo(activeLink);
+              }
+            }
+          }
+
+          isTicking = false;
+        });
+        isTicking = true;
+      }
+    },
+    { passive: true }
+  );
+</script>

@@ -1,0 +1,1631 @@
+---
+// Vista oculta de administración para agregar y editar notas de blog
+// Ruta: /admin
+import "../../styles/global.css";
+import fs from "node:fs";
+import path from "node:path";
+
+const blogDir = path.resolve(process.cwd(), "src/content/blog");
+let existingPosts: Array<{
+  slug: string;
+  title: string;
+  description: string;
+  date: string;
+  author: string;
+  tag: string;
+  readTime: string;
+  image: string;
+  content: string;
+}> = [];
+
+try {
+  if (fs.existsSync(blogDir)) {
+    const fileNames = fs.readdirSync(blogDir).filter((file) => file.endsWith(".md"));
+    existingPosts = fileNames.map((fileName) => {
+      const filePath = path.join(blogDir, fileName);
+      const raw = fs.readFileSync(filePath, "utf-8");
+      const slug = fileName.replace(".md", "");
+
+      // Separar frontmatter y markdown
+      const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
+      const frontmatterStr = match ? match[1] : "";
+      const content = match ? match[2].trim() : raw.trim();
+
+      const title = frontmatterStr.match(/title:\s*"(.*?)"/)?.[1] || "";
+      const description = frontmatterStr.match(/description:\s*"(.*?)"/)?.[1] || "";
+      const date = frontmatterStr.match(/date:\s*"(.*?)"/)?.[1] || "";
+      const author = frontmatterStr.match(/author:\s*"(.*?)"/)?.[1] || "Od. Alexis Torres";
+      const tag = frontmatterStr.match(/tag:\s*"(.*?)"/)?.[1] || "Salud Bucal";
+      const readTime = frontmatterStr.match(/readTime:\s*"(.*?)"/)?.[1] || "5 min de lectura";
+      const image = frontmatterStr.match(/image:\s*"(.*?)"/)?.[1] || "";
+
+      return {
+        slug,
+        title,
+        description,
+        date,
+        author,
+        tag,
+        readTime,
+        image,
+        content,
+      };
+    });
+  }
+} catch {
+  existingPosts = [];
+}
+
+const postsJson = JSON.stringify(existingPosts);
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Panel de Administración | Od. Alexis Torres</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- 1. PANTALLA DE LOGIN -->
+    <div id="login-view" class="login-wrapper">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="logo-circle">
+            <img src="/logo.png" alt="Logo" class="logo-img" />
+          </div>
+          <h1>Panel Administrativo</h1>
+          <p>Gestor de Artículos de Blog · Od. Alexis Torres</p>
+        </div>
+
+        <form id="login-form" class="login-body">
+          <div id="login-error" class="alert-box error hidden">
+            Usuario o contraseña incorrectos.
+          </div>
+
+          <div class="form-group">
+            <label for="username">Usuario</label>
+            <input
+              type="text"
+              id="username"
+              placeholder="ej. usuario.admin"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="••••••••••••"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary full-width">
+            Iniciar sesión
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2. DASHBOARD / EDITOR DE BLOG -->
+    <div id="dashboard-view" class="dashboard-wrapper hidden">
+      <!-- Barra superior -->
+      <header class="top-nav">
+        <div class="nav-brand">
+          <img src="/logo.png" alt="Logo" class="brand-logo" />
+          <div>
+            <span class="brand-title">Od. Alexis Torres</span>
+            <span class="brand-sub">Panel de Publicación y Edición de Blog</span>
+          </div>
+        </div>
+
+        <div class="nav-actions">
+          <button id="new-post-top-btn" type="button" class="btn btn-accent btn-sm">
+            + Redactar nueva nota
+          </button>
+          <a href="/blog" target="_blank" class="btn btn-outline btn-sm">
+            Ver blog público ↗
+          </a>
+          <button id="logout-btn" type="button" class="btn btn-danger btn-sm">
+            Cerrar sesión
+          </button>
+        </div>
+      </header>
+
+      <!-- Mensaje de estado / notificación -->
+      <div class="dashboard-container">
+        <div id="status-toast" class="alert-box success hidden">
+          <span id="toast-message">Mensaje de estado</span>
+          <button id="close-toast" type="button" class="close-btn">✕</button>
+        </div>
+
+        <!-- Layout 2 columnas: Formulario y Vista previa -->
+        <div class="admin-grid">
+          <!-- Columna principal: Formulario -->
+          <div class="admin-col main-col">
+            <div class="card">
+              <!-- Banner informativo de Modo Edición -->
+              <div id="editing-indicator" class="editing-bar hidden">
+                <div class="editing-text">
+                  <span class="editing-badge">Modo Edición</span>
+                  <span>Editando nota: <strong id="editing-title-label">...</strong></span>
+                </div>
+                <button type="button" id="cancel-edit-btn" class="btn-cancel-edit">
+                  ✕ Cancelar y redactar nueva
+                </button>
+              </div>
+
+              <div class="card-header">
+                <h2 id="form-heading">Crear nueva nota de blog</h2>
+                <p id="form-subheading" class="subtitle">Escribe la nota y guárdala directamente o descárgala en Markdown (.md).</p>
+              </div>
+
+              <form id="post-form" class="editor-form">
+                <!-- Título -->
+                <div class="form-group">
+                  <label for="post-title">Título del artículo *</label>
+                  <input
+                    type="text"
+                    id="post-title"
+                    required
+                    placeholder="Ej: ¿Cada cuánto tiempo se debe cambiar el cepillo de dientes?"
+                  />
+                </div>
+
+                <!-- Slug y Categoría -->
+                <div class="grid-2">
+                  <div class="form-group">
+                    <label for="post-slug">Slug (URL amigable) *</label>
+                    <input
+                      type="text"
+                      id="post-slug"
+                      required
+                      placeholder="cambiar-cepillo-de-dientes"
+                    />
+                    <small class="help-text">Ruta: /blog/<span id="slug-preview">...</span></small>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="post-tag">Categoría / Especialidad *</label>
+                    <select id="post-tag">
+                      <option value="Salud Bucal" selected>Salud Bucal</option>
+                      <option value="Prevención">Prevención</option>
+                      <option value="Estética Dental">Estética Dental</option>
+                      <option value="Ortodoncia">Ortodoncia</option>
+                      <option value="Implantes Dentales">Implantes Dentales</option>
+                      <option value="Odontopediatría">Odontopediatría</option>
+                      <option value="Periodoncia">Periodoncia</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Tiempo, Fecha y Autor -->
+                <div class="grid-3">
+                  <div class="form-group">
+                    <label for="post-readtime">Tiempo de lectura</label>
+                    <input type="text" id="post-readtime" value="5 min de lectura" />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="post-date">Fecha</label>
+                    <input type="text" id="post-date" value="03 Mar 2026" />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="post-author">Autor</label>
+                    <input type="text" id="post-author" value="Od. Alexis Torres" />
+                  </div>
+                </div>
+
+                <!-- Imagen de portada con presets -->
+                <div class="form-group">
+                  <label for="post-image">URL de imagen de portada</label>
+                  <input
+                    type="url"
+                    id="post-image"
+                    value="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1000&auto=format&fit=crop"
+                  />
+                  <div class="presets-container">
+                    <span class="preset-label">Fotos recomendadas:</span>
+                    <button
+                      type="button"
+                      class="preset-pill"
+                      data-img="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1000&auto=format&fit=crop"
+                    >
+                      Sonrisa sana
+                    </button>
+                    <button
+                      type="button"
+                      class="preset-pill"
+                      data-img="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?q=80&w=1000&auto=format&fit=crop"
+                    >
+                      Revisión clínica
+                    </button>
+                    <button
+                      type="button"
+                      class="preset-pill"
+                      data-img="https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=1000&auto=format&fit=crop"
+                    >
+                      Consultorio
+                    </button>
+                    <button
+                      type="button"
+                      class="preset-pill"
+                      data-img="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop"
+                    >
+                      Paciente feliz
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Resumen SEO -->
+                <div class="form-group">
+                  <label for="post-description">Resumen corto (meta descripción) *</label>
+                  <textarea
+                    id="post-description"
+                    rows="2"
+                    required
+                    placeholder="Breve introducción de 1 a 2 párrafos para la tarjeta del blog y Google..."
+                  ></textarea>
+                </div>
+
+                <!-- Contenido Markdown -->
+                <div class="form-group">
+                  <div class="markdown-bar-header">
+                    <label for="post-content">Contenido del artículo (Markdown) *</label>
+                    <div class="toolbar-buttons">
+                      <button type="button" class="tool-btn" data-tool="h2">H2</button>
+                      <button type="button" class="tool-btn" data-tool="h3">H3</button>
+                      <button type="button" class="tool-btn bold" data-tool="bold">B</button>
+                      <button type="button" class="tool-btn italic" data-tool="italic">I</button>
+                      <button type="button" class="tool-btn" data-tool="quote">" Cita</button>
+                      <button type="button" class="tool-btn" data-tool="list">• Lista</button>
+                    </div>
+                  </div>
+                  <textarea
+                    id="post-content"
+                    rows="13"
+                    required
+                    placeholder="Escribe aquí el contenido en Markdown...
+
+## Primer subtítulo
+
+Explicación sobre el tema de salud bucodental...
+
+> Consejo del especialista: Acude al dentista cada 6 meses.
+
+### Consejos prácticos:
+- Mantén una higiene diaria adecuada
+- Usa hilo dental al menos una vez al día
+- Evita alimentos con exceso de azúcares"
+                  ></textarea>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="actions-row">
+                  <button type="submit" id="submit-post-btn" class="btn btn-primary">
+                    Guardar y publicar nota
+                  </button>
+
+                  <button type="button" id="download-md-btn" class="btn btn-secondary">
+                    Descargar archivo .md
+                  </button>
+
+                  <button type="button" id="copy-md-btn" class="btn btn-ghost">
+                    Copiar Markdown
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Columna lateral: Vista previa y artículos publicados -->
+          <div class="admin-col side-col">
+            <!-- Tarjeta Preview -->
+            <div class="card preview-card">
+              <div class="card-header compact">
+                <h3>Vista previa en tiempo real</h3>
+                <span class="preview-badge">Live</span>
+              </div>
+
+              <div class="preview-article">
+                <div class="preview-img-box">
+                  <img
+                    id="preview-image"
+                    src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1000&auto=format&fit=crop"
+                    alt="Preview"
+                  />
+                  <span id="preview-tag" class="preview-tag-pill">Salud Bucal</span>
+                </div>
+
+                <div class="preview-info">
+                  <p id="preview-meta" class="preview-meta-text">
+                    03 Mar 2026 · 5 min de lectura · Por Od. Alexis Torres
+                  </p>
+                  <h4 id="preview-title">Título del artículo</h4>
+                  <p id="preview-desc">Resumen del artículo...</p>
+                </div>
+
+                <div class="preview-body-divider">
+                  <span class="preview-body-label">Texto del artículo:</span>
+                  <div id="preview-body" class="preview-rendered-body">
+                    <em>El texto formateado aparecerá aquí mientras escribes...</em>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarjeta Artículos Existentes con botón de EDITAR -->
+            <div class="card">
+              <div class="card-header compact">
+                <div>
+                  <h3>Artículos en el blog ({existingPosts.length})</h3>
+                  <small style="color:#64748b;font-size:0.75rem;">Haz clic en <strong>«Editar ✎»</strong> para modificar una nota</small>
+                </div>
+                <a href="/blog" target="_blank" class="link-sm">Ver todos ↗</a>
+              </div>
+
+              <div class="existing-posts-list">
+                {existingPosts.map((p) => (
+                  <div class="post-item" data-item-slug={p.slug}>
+                    <div class="post-info">
+                      <span class="post-tag">{p.tag}</span>
+                      <strong class="post-title" title={p.title}>{p.title}</strong>
+                      <span class="post-date">{p.date}</span>
+                    </div>
+                    <div class="post-buttons">
+                      <button
+                        type="button"
+                        class="btn-edit"
+                        data-edit-slug={p.slug}
+                        title="Cargar nota para editar"
+                      >
+                        Editar ✎
+                      </button>
+                      <a
+                        href={`/blog/${p.slug}`}
+                        target="_blank"
+                        class="btn-visit"
+                        title="Ver nota pública"
+                      >
+                        Ver ↗
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- JSON embebido con los datos completos de los posts para edición instantánea -->
+    <script id="posts-data-json" type="application/json" set:html={postsJson} />
+
+    <!-- ESTILOS COMPLETOS, SENCILLOS Y ROBUSTOS -->
+    <style>
+      :root {
+        --color-primary: #0D214B;
+        --color-primary-hover: #16326d;
+        --color-green: #4E8C41;
+        --color-green-hover: #3d7232;
+        --color-bg: #f8fafc;
+        --color-card: #ffffff;
+        --color-border: #e2e8f0;
+        --color-text-main: #0f172a;
+        --color-text-muted: #64748b;
+        --radius-lg: 18px;
+        --radius-md: 12px;
+        --radius-sm: 8px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: var(--color-bg);
+        color: var(--color-text-main);
+        line-height: 1.5;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* 1. LOGIN */
+      .login-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #0D214B 0%, #1e293b 100%);
+      }
+
+      .login-card {
+        width: 100%;
+        max-width: 440px;
+        background: var(--color-card);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      }
+
+      .login-header {
+        background: var(--color-primary);
+        padding: 2.25rem 2rem;
+        text-align: center;
+        color: #ffffff;
+      }
+
+      .logo-circle {
+        width: 68px;
+        height: 68px;
+        margin: 0 auto 1rem;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+      }
+
+      .logo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .login-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .login-header p {
+        font-size: 0.8125rem;
+        color: #cbd5e1;
+      }
+
+      .login-body {
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .credentials-hint {
+        background-color: #f1f5f9;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: 0.875rem 1rem;
+        font-size: 0.8125rem;
+        color: var(--color-text-muted);
+        line-height: 1.6;
+      }
+
+      .credentials-hint code {
+        background-color: #e2e8f0;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        color: var(--color-primary);
+        font-weight: 600;
+      }
+
+      /* 2. DASHBOARD TOP NAV */
+      .dashboard-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .top-nav {
+        background-color: var(--color-primary);
+        color: #ffffff;
+        padding: 0.875rem 1.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+      }
+
+      .brand-logo {
+        width: 38px;
+        height: 38px;
+        object-fit: contain;
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 4px;
+      }
+
+      .brand-title {
+        display: block;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .brand-sub {
+        display: block;
+        font-size: 0.75rem;
+        color: #94a3b8;
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: rgba(78, 140, 65, 0.2);
+        color: #86efac;
+        border: 1px solid rgba(78, 140, 65, 0.4);
+        padding: 0.35rem 0.875rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .dot-live {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #4ade80;
+      }
+
+      /* 3. LAYOUT Y TARJETAS */
+      .dashboard-container {
+        max-width: 1240px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 2rem 1.25rem;
+        flex: 1;
+      }
+
+      .admin-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.75rem;
+      }
+
+      @media (min-width: 1024px) {
+        .admin-grid {
+          grid-template-columns: 7fr 5fr;
+        }
+      }
+
+      .admin-col {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .card {
+        background-color: var(--color-card);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: 1.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Modo Edición Banner */
+      .editing-bar {
+        background-color: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-left: 4px solid var(--color-primary);
+        border-radius: var(--radius-md);
+        padding: 0.875rem 1.25rem;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .editing-text {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+        color: #1e3a8a;
+      }
+
+      .editing-badge {
+        background-color: var(--color-primary);
+        color: #ffffff;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 0.2rem 0.6rem;
+        border-radius: 9999px;
+      }
+
+      .btn-cancel-edit {
+        background: #ffffff;
+        border: 1px solid #93c5fd;
+        color: #1e40af;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+
+      .btn-cancel-edit:hover {
+        background: #dbeafe;
+      }
+
+      .card-header {
+        border-bottom: 1px solid var(--color-border);
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .card-header.compact {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .card-header h2 {
+        font-size: 1.375rem;
+        font-weight: 700;
+        color: var(--color-text-main);
+      }
+
+      .card-header h3 {
+        font-size: 1.0625rem;
+        font-weight: 700;
+        color: var(--color-text-main);
+      }
+
+      .subtitle {
+        font-size: 0.875rem;
+        color: var(--color-text-muted);
+        margin-top: 0.25rem;
+      }
+
+      /* 4. FORMULARIO & INPUTS */
+      .editor-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .form-group label {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #334155;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
+      input[type="text"],
+      input[type="password"],
+      input[type="url"],
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-family: inherit;
+        font-size: 0.9375rem;
+        color: var(--color-text-main);
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: var(--radius-md);
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        background-color: #ffffff;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(13, 33, 75, 0.12);
+      }
+
+      textarea {
+        font-family: 'DM Sans', -apple-system, sans-serif;
+        line-height: 1.6;
+      }
+
+      #post-content {
+        font-family: Consolas, Monaco, 'Courier New', monospace;
+        font-size: 0.875rem;
+      }
+
+      .help-text {
+        font-size: 0.75rem;
+        color: var(--color-text-muted);
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      @media (min-width: 640px) {
+        .grid-2 {
+          grid-template-columns: 1fr 1fr;
+        }
+        .grid-3 {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+
+      /* Presets de fotos */
+      .presets-container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .preset-label {
+        font-size: 0.75rem;
+        color: var(--color-text-muted);
+      }
+
+      .preset-pill {
+        background-color: #e2e8f0;
+        color: #334155;
+        border: none;
+        padding: 0.25rem 0.625rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .preset-pill:hover {
+        background-color: #cbd5e1;
+      }
+
+      /* Barra de herramientas markdown */
+      .markdown-bar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .toolbar-buttons {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .tool-btn {
+        background-color: #e2e8f0;
+        border: none;
+        color: #1e293b;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .tool-btn:hover {
+        background-color: #cbd5e1;
+      }
+
+      .tool-btn.bold { font-weight: 800; }
+      .tool-btn.italic { font-style: italic; }
+
+      /* Botones */
+      .actions-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--color-border);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border-radius: 9999px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        border: none;
+      }
+
+      .btn.full-width {
+        width: 100%;
+      }
+
+      .btn-primary {
+        background-color: var(--color-primary);
+        color: #ffffff;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--color-primary-hover);
+        transform: translateY(-1px);
+      }
+
+      .btn-accent {
+        background-color: var(--color-green);
+        color: #ffffff;
+      }
+
+      .btn-accent:hover {
+        background-color: var(--color-green-hover);
+      }
+
+      .btn-secondary {
+        background-color: #ffffff;
+        color: #1e293b;
+        border: 1px solid #cbd5e1;
+      }
+
+      .btn-secondary:hover {
+        background-color: #f1f5f9;
+        border-color: #94a3b8;
+      }
+
+      .btn-ghost {
+        background-color: #f1f5f9;
+        color: #475569;
+        border: 1px solid transparent;
+      }
+
+      .btn-ghost:hover {
+        background-color: #e2e8f0;
+      }
+
+      .btn-outline {
+        background-color: rgba(255, 255, 255, 0.12);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+      }
+
+      .btn-outline:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .btn-danger {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      .btn-danger:hover {
+        background-color: rgba(239, 68, 68, 0.25);
+      }
+
+      .btn-sm {
+        padding: 0.45rem 0.875rem;
+        font-size: 0.8125rem;
+      }
+
+      /* 5. VISTA PREVIA */
+      .preview-card {
+        border-left: 4px solid var(--color-green);
+      }
+
+      .preview-badge {
+        background-color: #e2e8f0;
+        color: #475569;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+      }
+
+      .preview-article {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .preview-img-box {
+        position: relative;
+        width: 100%;
+        height: 180px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background-color: #e2e8f0;
+      }
+
+      .preview-img-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .preview-tag-pill {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background-color: rgba(255, 255, 255, 0.95);
+        color: var(--color-primary);
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .preview-meta-text {
+        font-size: 0.75rem;
+        color: var(--color-text-muted);
+        margin-bottom: 0.25rem;
+      }
+
+      .preview-info h4 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--color-text-main);
+        line-height: 1.35;
+      }
+
+      .preview-info p {
+        font-size: 0.8125rem;
+        color: var(--color-text-muted);
+        margin-top: 0.5rem;
+        line-height: 1.5;
+      }
+
+      .preview-body-divider {
+        border-top: 1px solid var(--color-border);
+        padding-top: 0.875rem;
+      }
+
+      .preview-body-label {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      .preview-rendered-body {
+        background-color: #f8fafc;
+        border-radius: var(--radius-md);
+        padding: 0.875rem;
+        font-size: 0.8125rem;
+        color: #334155;
+        max-height: 220px;
+        overflow-y: auto;
+        line-height: 1.6;
+      }
+
+      /* 6. LISTA ARTICULOS EXISTENTES */
+      .existing-posts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .post-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        background-color: #f8fafc;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: 0.75rem 1rem;
+        transition: all 0.2s;
+      }
+
+      .post-item:hover {
+        background-color: #f1f5f9;
+        border-color: #cbd5e1;
+      }
+
+      .post-item.is-editing {
+        background-color: #eff6ff;
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 2px rgba(13, 33, 75, 0.15);
+      }
+
+      .post-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        min-width: 0;
+        flex: 1;
+      }
+
+      .post-tag {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        color: var(--color-green);
+        text-transform: uppercase;
+      }
+
+      .post-title {
+        font-size: 0.8125rem;
+        color: var(--color-text-main);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .post-date {
+        font-size: 0.6875rem;
+        color: var(--color-text-muted);
+      }
+
+      .post-buttons {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        shrink-0: 0;
+      }
+
+      .btn-edit {
+        background-color: var(--color-primary);
+        color: #ffffff;
+        border: none;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .btn-edit:hover {
+        background-color: var(--color-primary-hover);
+      }
+
+      .btn-visit {
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.35rem 0.625rem;
+        border-radius: 9999px;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.2s;
+      }
+
+      .btn-visit:hover {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+      }
+
+      .link-sm {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--color-primary);
+        text-decoration: none;
+      }
+
+      .link-sm:hover {
+        color: var(--color-green);
+      }
+
+      /* 7. ALERTAS Y TOAST */
+      .alert-box {
+        padding: 0.875rem 1.25rem;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .alert-box.error {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+      }
+
+      .alert-box.success {
+        background-color: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+        margin-bottom: 1.5rem;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+        color: inherit;
+        font-weight: bold;
+      }
+    </style>
+
+    <!-- 8. JAVASCRIPT: SESIÓN, EDICIÓN, GENERACIÓN DE MARKDOWN Y GUARDADO -->
+    <script>
+      const AUTH_KEY = "od_alexis_blog_auth";
+      const VALID_USER = "alexis";
+      const VALID_PASS = "TorresDental2026!";
+
+      // Cargar lista de posts para edición en memoria
+      let postsList: Array<{
+        slug: string;
+        title: string;
+        description: string;
+        date: string;
+        author: string;
+        tag: string;
+        readTime: string;
+        image: string;
+        content: string;
+      }> = [];
+
+      try {
+        const scriptData = document.getElementById("posts-data-json")?.textContent;
+        if (scriptData) {
+          postsList = JSON.parse(scriptData);
+        }
+      } catch (e) {
+        console.error("Error al cargar posts para edición:", e);
+      }
+
+      // Estado de edición actual (null = creando nueva nota)
+      let currentEditingSlug: string | null = null;
+
+      const loginView = document.getElementById("login-view");
+      const dashboardView = document.getElementById("dashboard-view");
+      const loginForm = document.getElementById("login-form") as HTMLFormElement;
+      const loginError = document.getElementById("login-error");
+      const logoutBtn = document.getElementById("logout-btn");
+      const newPostTopBtn = document.getElementById("new-post-top-btn");
+
+      const editingIndicator = document.getElementById("editing-indicator");
+      const editingTitleLabel = document.getElementById("editing-title-label");
+      const cancelEditBtn = document.getElementById("cancel-edit-btn");
+      const formHeading = document.getElementById("form-heading");
+      const formSubheading = document.getElementById("form-subheading");
+
+      const postForm = document.getElementById("post-form") as HTMLFormElement;
+      const titleInput = document.getElementById("post-title") as HTMLInputElement;
+      const slugInput = document.getElementById("post-slug") as HTMLInputElement;
+      const tagSelect = document.getElementById("post-tag") as HTMLSelectElement;
+      const readtimeInput = document.getElementById("post-readtime") as HTMLInputElement;
+      const dateInput = document.getElementById("post-date") as HTMLInputElement;
+      const authorInput = document.getElementById("post-author") as HTMLInputElement;
+      const imageInput = document.getElementById("post-image") as HTMLInputElement;
+      const descInput = document.getElementById("post-description") as HTMLTextAreaElement;
+      const contentInput = document.getElementById("post-content") as HTMLTextAreaElement;
+      const submitPostBtn = document.getElementById("submit-post-btn") as HTMLButtonElement;
+
+      const slugPreview = document.getElementById("slug-preview");
+      const previewTitle = document.getElementById("preview-title");
+      const previewTag = document.getElementById("preview-tag");
+      const previewMeta = document.getElementById("preview-meta");
+      const previewDesc = document.getElementById("preview-desc");
+      const previewImage = document.getElementById("preview-image") as HTMLImageElement;
+      const previewBody = document.getElementById("preview-body");
+
+      const statusToast = document.getElementById("status-toast");
+      const toastMessage = document.getElementById("toast-message");
+      const closeToast = document.getElementById("close-toast");
+
+      const downloadMdBtn = document.getElementById("download-md-btn");
+      const copyMdBtn = document.getElementById("copy-md-btn");
+
+      // Control de sesión
+      function checkAuth() {
+        const isAuth = sessionStorage.getItem(AUTH_KEY);
+        if (isAuth === "true") {
+          loginView?.classList.add("hidden");
+          dashboardView?.classList.remove("hidden");
+        } else {
+          loginView?.classList.remove("hidden");
+          dashboardView?.classList.add("hidden");
+        }
+      }
+
+      loginForm?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const user = (document.getElementById("username") as HTMLInputElement).value.trim();
+        const pass = (document.getElementById("password") as HTMLInputElement).value;
+
+        if ((user === VALID_USER || user === "admin") && pass === VALID_PASS) {
+          sessionStorage.setItem(AUTH_KEY, "true");
+          loginError?.classList.add("hidden");
+          checkAuth();
+        } else {
+          loginError?.classList.remove("hidden");
+        }
+      });
+
+      logoutBtn?.addEventListener("click", () => {
+        sessionStorage.removeItem(AUTH_KEY);
+        checkAuth();
+      });
+
+      // Slug
+      function slugify(text: string): string {
+        return text
+          .toString()
+          .toLowerCase()
+          .trim()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9 -]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .replace(/^-|-$/g, "");
+      }
+
+      titleInput?.addEventListener("input", () => {
+        if (!currentEditingSlug && !slugInput.dataset.manual) {
+          const generated = slugify(titleInput.value);
+          slugInput.value = generated;
+          if (slugPreview) slugPreview.textContent = generated || "...";
+        }
+        updatePreview();
+      });
+
+      slugInput?.addEventListener("input", () => {
+        slugInput.dataset.manual = "true";
+        if (slugPreview) slugPreview.textContent = slugify(slugInput.value) || "...";
+      });
+
+      // Presets
+      document.querySelectorAll(".preset-pill").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const url = btn.getAttribute("data-img");
+          if (url && imageInput) {
+            imageInput.value = url;
+            updatePreview();
+          }
+        });
+      });
+
+      // Herramientas Markdown
+      document.querySelectorAll(".tool-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const tool = btn.getAttribute("data-tool");
+          const start = contentInput.selectionStart;
+          const end = contentInput.selectionEnd;
+          const text = contentInput.value;
+          const sel = text.substring(start, end);
+
+          let rep = "";
+          switch (tool) {
+            case "h2":
+              rep = `\n\n## ${sel || "Título de sección"}\n`;
+              break;
+            case "h3":
+              rep = `\n\n### ${sel || "Subtítulo"}\n`;
+              break;
+            case "bold":
+              rep = `**${sel || "texto en negrita"}**`;
+              break;
+            case "italic":
+              rep = `*${sel || "texto en cursiva"}*`;
+              break;
+            case "quote":
+              rep = `\n> ${sel || "Cita o recomendación profesional..."}\n`;
+              break;
+            case "list":
+              rep = `\n- ${sel || "Punto uno"}\n- Punto dos\n`;
+              break;
+          }
+
+          contentInput.value = text.substring(0, start) + rep + text.substring(end);
+          contentInput.focus();
+          updatePreview();
+        });
+      });
+
+      // Actualizar vista previa
+      function updatePreview() {
+        if (previewTitle) previewTitle.textContent = titleInput.value || "Título del artículo";
+        if (previewTag) previewTag.textContent = tagSelect.value || "Salud Bucal";
+        if (previewDesc) previewDesc.textContent = descInput.value || "Resumen del artículo...";
+        if (previewMeta) {
+          previewMeta.textContent = `${dateInput.value} · ${readtimeInput.value} · Por ${authorInput.value}`;
+        }
+        if (previewImage && imageInput.value) {
+          previewImage.src = imageInput.value;
+        }
+
+        if (previewBody) {
+          const raw = contentInput.value.trim();
+          if (!raw) {
+            previewBody.innerHTML = "<em>El texto formateado aparecerá aquí mientras escribes...</em>";
+          } else {
+            let html = raw
+              .replace(/^## (.*$)/gim, '<strong style="display:block;font-size:0.95rem;color:#0D214B;margin-top:0.5rem;">$1</strong>')
+              .replace(/^### (.*$)/gim, '<strong style="display:block;font-size:0.875rem;color:#1e293b;margin-top:0.35rem;">$1</strong>')
+              .replace(/^\> (.*$)/gim, '<blockquote style="border-left:3px solid #4E8C41;padding-left:0.5rem;color:#475569;font-style:italic;margin:0.4rem 0;">$1</blockquote>')
+              .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+              .replace(/\*(.*)\*/gim, '<em>$1</em>')
+              .replace(/^- (.*$)/gim, '<span style="display:block;padding-left:0.75rem;">• $1</span>')
+              .replace(/\n$/gim, '<br />');
+            previewBody.innerHTML = html;
+          }
+        }
+      }
+
+      [titleInput, slugInput, tagSelect, readtimeInput, dateInput, authorInput, imageInput, descInput, contentInput].forEach((el) => {
+        el?.addEventListener("input", updatePreview);
+      });
+
+      // 3. FUNCIÓN DE EDICIÓN DE NOTAS
+      function loadPostForEdit(slug: string) {
+        const post = postsList.find((p) => p.slug === slug);
+        if (!post) {
+          showToast(`No se encontró la nota con identificador: ${slug}`, true);
+          return;
+        }
+
+        currentEditingSlug = post.slug;
+
+        // Rellenar campos del formulario
+        titleInput.value = post.title;
+        slugInput.value = post.slug;
+        slugInput.dataset.manual = "true";
+        if (slugPreview) slugPreview.textContent = post.slug;
+
+        tagSelect.value = post.tag || "Salud Bucal";
+        readtimeInput.value = post.readTime || "5 min de lectura";
+        dateInput.value = post.date || "03 Mar 2026";
+        authorInput.value = post.author || "Od. Alexis Torres";
+        imageInput.value = post.image || "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1000&auto=format&fit=crop";
+        descInput.value = post.description || "";
+        contentInput.value = post.content || "";
+
+        // Actualizar interfaz a "Modo Edición"
+        if (editingIndicator) editingIndicator.classList.remove("hidden");
+        if (editingTitleLabel) editingTitleLabel.textContent = post.title;
+        if (formHeading) formHeading.textContent = `Editar nota: "${post.title}"`;
+        if (formSubheading) formSubheading.textContent = `Modifica los campos y haz clic en "Actualizar nota" para guardar los cambios en ${post.slug}.md`;
+        if (submitPostBtn) submitPostBtn.textContent = "Actualizar y guardar cambios";
+
+        // Marcar en la lista la nota que se está editando
+        document.querySelectorAll(".post-item").forEach((el) => {
+          if (el.getAttribute("data-item-slug") === slug) {
+            el.classList.add("is-editing");
+          } else {
+            el.classList.remove("is-editing");
+          }
+        });
+
+        // Scroll suave al formulario
+        postForm?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        updatePreview();
+        showToast(`Nota cargada para edición: "${post.title}"`);
+      }
+
+      function resetFormToNew() {
+        currentEditingSlug = null;
+        postForm?.reset();
+
+        // Valores por defecto
+        delete slugInput.dataset.manual;
+        readtimeInput.value = "5 min de lectura";
+        dateInput.value = "03 Mar 2026";
+        authorInput.value = "Od. Alexis Torres";
+        imageInput.value = "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1000&auto=format&fit=crop";
+        tagSelect.value = "Salud Bucal";
+        if (slugPreview) slugPreview.textContent = "...";
+
+        // Restaurar interfaz
+        if (editingIndicator) editingIndicator.classList.add("hidden");
+        if (formHeading) formHeading.textContent = "Crear nueva nota de blog";
+        if (formSubheading) formSubheading.textContent = "Escribe la nota y guárdala directamente o descárgala en Markdown (.md).";
+        if (submitPostBtn) submitPostBtn.textContent = "Guardar y publicar nota";
+
+        document.querySelectorAll(".post-item").forEach((el) => el.classList.remove("is-editing"));
+        updatePreview();
+      }
+
+      // Eventos de los botones de editar
+      document.querySelectorAll(".btn-edit").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const slug = btn.getAttribute("data-edit-slug");
+          if (slug) loadPostForEdit(slug);
+        });
+      });
+
+      cancelEditBtn?.addEventListener("click", resetFormToNew);
+      newPostTopBtn?.addEventListener("click", resetFormToNew);
+
+      // Exportar / Descargar Markdown
+      function getMarkdown(): { filename: string; content: string } {
+        const slug = slugify(slugInput.value || titleInput.value || "nota-actualizada");
+        const filename = `${slug}.md`;
+        const content = `---
+title: "${titleInput.value.replace(/"/g, '\\"')}"
+description: "${descInput.value.replace(/"/g, '\\"')}"
+date: "${dateInput.value || '03 Mar 2026'}"
+author: "${authorInput.value || 'Od. Alexis Torres'}"
+tag: "${tagSelect.value || 'Salud Bucal'}"
+readTime: "${readtimeInput.value || '5 min de lectura'}"
+image: "${imageInput.value || 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1000&auto=format&fit=crop'}"
+avatar: "/logo.png"
+---
+
+${contentInput.value.trim()}
+`;
+        return { filename, content };
+      }
+
+      function showToast(msg: string, isError = false) {
+        if (!statusToast || !toastMessage) return;
+        toastMessage.textContent = msg;
+        statusToast.className = `alert-box ${isError ? "error" : "success"}`;
+        statusToast.classList.remove("hidden");
+      }
+
+      closeToast?.addEventListener("click", () => {
+        statusToast?.classList.add("hidden");
+      });
+
+      function downloadFile(filename: string, content: string) {
+        const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      downloadMdBtn?.addEventListener("click", () => {
+        const { filename, content } = getMarkdown();
+        downloadFile(filename, content);
+        showToast(`Archivo "${filename}" descargado con éxito. Guárdalo en src/content/blog/`);
+      });
+
+      copyMdBtn?.addEventListener("click", async () => {
+        const { content } = getMarkdown();
+        try {
+          await navigator.clipboard.writeText(content);
+          showToast("¡Contenido Markdown copiado al portapapeles!");
+        } catch {
+          showToast("No se pudo copiar automáticamente.", true);
+        }
+      });
+
+      // Submit: Guardar o Actualizar
+      postForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const origText = submitPostBtn.textContent || "";
+        submitPostBtn.disabled = true;
+        submitPostBtn.textContent = currentEditingSlug ? "Actualizando nota..." : "Guardando nota...";
+
+        const { filename, content } = getMarkdown();
+        const slug = slugify(slugInput.value || titleInput.value);
+
+        try {
+          const res = await fetch("/api/guardar-nota", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: titleInput.value,
+              slug,
+              oldSlug: currentEditingSlug,
+              description: descInput.value,
+              tag: tagSelect.value,
+              readTime: readtimeInput.value,
+              date: dateInput.value,
+              author: authorInput.value,
+              image: imageInput.value,
+              content: contentInput.value,
+              password: VALID_PASS,
+            }),
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const actionVerb = currentEditingSlug ? "actualizada" : "creada y publicada";
+            showToast(`¡Nota "${filename}" ${actionVerb} exitosamente!`);
+
+            // Actualizar en la lista en memoria
+            const existingIdx = postsList.findIndex((p) => p.slug === (currentEditingSlug || slug));
+            const updatedObj = {
+              slug,
+              title: titleInput.value,
+              description: descInput.value,
+              date: dateInput.value,
+              author: authorInput.value,
+              tag: tagSelect.value,
+              readTime: readtimeInput.value,
+              image: imageInput.value,
+              content: contentInput.value,
+            };
+
+            if (existingIdx >= 0) {
+              postsList[existingIdx] = updatedObj;
+            } else {
+              postsList.push(updatedObj);
+            }
+
+            // Actualizar etiqueta del item en la lista visual
+            const visualItem = document.querySelector(`.post-item[data-item-slug="${currentEditingSlug || slug}"]`);
+            if (visualItem) {
+              const titleEl = visualItem.querySelector(".post-title");
+              if (titleEl) titleEl.textContent = titleInput.value;
+            }
+          } else {
+            downloadFile(filename, content);
+            showToast(`Nota generada. Se ha descargado "${filename}" para guardarla en src/content/blog/`);
+          }
+        } catch {
+          downloadFile(filename, content);
+          showToast(`Se ha descargado "${filename}". Colócalo en src/content/blog/`);
+        } finally {
+          submitPostBtn.disabled = false;
+          submitPostBtn.textContent = origText;
+        }
+      });
+
+      // Init
+      checkAuth();
+      updatePreview();
+    </script>
+  </body>
+</html>

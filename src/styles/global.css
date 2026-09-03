@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #0D214B;
+  --color-brand-green: #4E8C41;
+}
+
+body { 
+  font-family: 'DM Sans', sans-serif; 
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transform: translate3d(0, 0, 0);
+}
+
+.glass-dark {
+  background: rgba(13, 33, 75, 0.7);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #0D214B, #4E8C41);
+}
+
+.avatar-ring {
+  border: 2px solid white;
+  margin-left: -8px;
+}

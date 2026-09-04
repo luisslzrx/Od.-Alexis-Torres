@@ -7,11 +7,15 @@ import WhatsAppButton from '../components/WhatsAppButton.astro';
 interface Props {
 	title?: string;
 	description?: string;
+	keywords?: string;
+	canonical?: string;
 }
 
 const {
-	title = 'Od. Alexis Torres | Odontólogo en Xalapa, Ver.',
-	description = 'Consultorio dental del Odontólogo Alexis Torres en Xalapa, Ver. Tratamientos dentales modernos, prevención y cuidado integral para tu sonrisa.',
+	title = 'Dentista en Xalapa, Veracruz | Alexis Torres',
+	description = 'Dentista en Xalapa, Veracruz. Alexis Torres ofrece atención dental profesional y tratamientos personalizados para cuidar tu salud y sonrisa. Agenda tu cita.',
+	keywords = 'dentista en Xalapa, odontólogo en Xalapa, dentista Xalapa Veracruz, consultorio dental en Xalapa, servicios dentales en Xalapa',
+	canonical = '/',
 } = Astro.props;
 import CookieBanner from '../components/CookieBanner.astro';
 ---
@@ -25,10 +29,16 @@ import CookieBanner from '../components/CookieBanner.astro';
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<meta name="description" content={description} />
+		<meta name="keywords" content={keywords} />
+		<link rel="canonical" href={canonical} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:type" content="website" />
 		<meta property="og:image" content="/images/banner.webp" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content="/images/banner.webp" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />

@@ -7,10 +7,10 @@ const services = [
       "Eliminación profesional de sarro y placa bacteriana para prevenir caries, cuidar tus encías y mantener tu salud bucal.",
   },
   {
-    image: "/images/Implantes-dentales.webp",
-    title: "Implantes dentales",
+    image: "/images/blanqueamiento-dental.webp",
+    title: "Blanqueamiento dental",
     description:
-      "Reemplazo fijo de alta precisión para recuperar la función masticatoria, la estética y la confianza en tu sonrisa.",
+      "Tratamiento estético seguro y eficaz para aclarar varios tonos tu esmalte, eliminando manchas y devolviendo el brillo a tu sonrisa.",
   },
   {
     image: "/images/corona-dental.webp",
@@ -115,13 +115,13 @@ const services = [
       {
         services.map((service, index) => (
           <article
-            class={`group flex flex-col rounded-3xl bg-slate-50 p-3 sm:p-3.5 shadow-xs hover:shadow-md transition-all border border-slate-100/80 w-[82vw] max-w-[290px] sm:w-[calc(50%-10px)] sm:max-w-none lg:w-[calc((100%-60px)/4)] shrink-0 snap-start apple-reveal apple-card ${index === 0 ? '' : index === 1 ? 'apple-delay-1' : index === 2 ? 'apple-delay-2' : index === 3 ? 'apple-delay-3' : index === 4 ? 'apple-delay-4' : 'apple-delay-5'}`}
+            class={`group flex flex-col rounded-3xl bg-slate-50 p-3 sm:p-3.5 shadow-xs hover:shadow-md transition-all border border-slate-100/80 w-[82vw] max-w-[290px] sm:w-[calc(50%-10px)] sm:max-w-none lg:w-[calc((100%-60px)/4)] shrink-0 snap-start apple-reveal apple-card ${index === 0 ? "" : index === 1 ? "apple-delay-1" : index === 2 ? "apple-delay-2" : index === 3 ? "apple-delay-3" : index === 4 ? "apple-delay-4" : "apple-delay-5"}`}
           >
             <div class="relative overflow-hidden rounded-2xl">
               <img
                 src={service.image}
                 alt={service.title}
-                class="h-52 sm:h-56 lg:h-60 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                class="h-60 sm:h-64 lg:h-72 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </div>
 
@@ -165,29 +165,29 @@ const services = [
 
 <script>
   function setupServiciosSlider() {
-    const slider = document.getElementById('servicios-slider');
-    const prevBtn = document.getElementById('servicios-prev');
-    const nextBtn = document.getElementById('servicios-next');
+    const slider = document.getElementById("servicios-slider");
+    const prevBtn = document.getElementById("servicios-prev");
+    const nextBtn = document.getElementById("servicios-next");
 
     if (!slider || !prevBtn || !nextBtn) return;
 
     function getScrollAmount() {
-      const firstCard = slider?.querySelector<HTMLElement>('article');
+      const firstCard = slider?.querySelector<HTMLElement>("article");
       if (firstCard) {
         return firstCard.offsetWidth + 20; // Ancho de tarjeta + gap
       }
       return window.innerWidth < 640 ? 280 : 320;
     }
 
-    prevBtn.addEventListener('click', () => {
-      slider.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+    prevBtn.addEventListener("click", () => {
+      slider.scrollBy({ left: -getScrollAmount(), behavior: "smooth" });
     });
 
-    nextBtn.addEventListener('click', () => {
-      slider.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+    nextBtn.addEventListener("click", () => {
+      slider.scrollBy({ left: getScrollAmount(), behavior: "smooth" });
     });
   }
 
   setupServiciosSlider();
-  document.addEventListener('astro:page-load', setupServiciosSlider);
+  document.addEventListener("astro:page-load", setupServiciosSlider);
 </script>

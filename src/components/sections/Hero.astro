@@ -52,14 +52,16 @@
           <h1
             class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.08] sm:leading-[1.06] text-white tracking-tight"
           >
-            Cuidado dental<br />
-            para toda la familia
+            Dentista en Xalapa<br />
+            para cuidar tu sonrisa
           </h1>
           <p
-            class="mt-3 sm:mt-6 max-w-sm text-xs sm:text-base leading-relaxed text-white/80"
+            class="mt-3 sm:mt-6 max-w-xl text-xs sm:text-sm md:text-base leading-relaxed text-white/85"
           >
-            Soluciones dentales naturales para recuperar piezas perdidas y
-            devolver salud y confianza a tu sonrisa.
+            En el consultorio dental de Alexis Torres en Xalapa, Veracruz,
+            encontrarás atención odontológica profesional y personalizada para
+            cuidar tu salud bucal. Desde prevención y limpieza dental hasta
+            tratamientos para recuperar la función y estética de tu sonrisa.
           </p>
 
           <a
@@ -113,12 +115,12 @@
           <span
             class="rounded-full bg-white/20 backdrop-blur-md px-3.5 py-1.5 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-medium text-white border border-white/25 shadow-lg"
           >
-            Tratamiento de encías
+            Prótesis dental fija y removible
           </span>
           <span
             class="rounded-full bg-white/20 backdrop-blur-md px-3.5 py-1.5 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-medium text-white border border-white/25 shadow-lg"
           >
-            Retenedores
+            Extracciones
           </span>
         </div>
       </div>
@@ -184,19 +186,20 @@
 
 <script>
   function initHeroSlider() {
-    const slides = document.querySelectorAll<HTMLImageElement>('.hero-bg-slide');
-    const prevBtn = document.getElementById('hero-prev');
-    const nextBtn = document.getElementById('hero-next');
-    const counter = document.getElementById('hero-counter');
-    const progress = document.getElementById('hero-progress');
-    const tagline = document.getElementById('hero-tagline');
-    const heroSection = document.getElementById('inicio');
+    const slides =
+      document.querySelectorAll<HTMLImageElement>(".hero-bg-slide");
+    const prevBtn = document.getElementById("hero-prev");
+    const nextBtn = document.getElementById("hero-next");
+    const counter = document.getElementById("hero-counter");
+    const progress = document.getElementById("hero-progress");
+    const tagline = document.getElementById("hero-tagline");
+    const heroSection = document.getElementById("inicio");
 
     if (!slides.length) return;
 
     const taglines = [
-      'Tu sonrisa, nuestra ciencia',
-      'Diagnóstico y tecnología moderna'
+      "Tu sonrisa, nuestra ciencia",
+      "Diagnóstico y tecnología moderna",
     ];
 
     let currentIndex = 0;
@@ -208,17 +211,17 @@
 
       slides.forEach((slide, i) => {
         if (i === currentIndex) {
-          slide.classList.remove('opacity-0');
-          slide.classList.add('opacity-100');
+          slide.classList.remove("opacity-0");
+          slide.classList.add("opacity-100");
         } else {
-          slide.classList.remove('opacity-100');
-          slide.classList.add('opacity-0');
+          slide.classList.remove("opacity-100");
+          slide.classList.add("opacity-0");
         }
       });
 
       if (counter) {
-        const currStr = String(currentIndex + 1).padStart(2, '0');
-        const totStr = String(total).padStart(2, '0');
+        const currStr = String(currentIndex + 1).padStart(2, "0");
+        const totStr = String(total).padStart(2, "0");
         counter.textContent = `${currStr} / ${totStr}`;
       }
 
@@ -228,10 +231,10 @@
       }
 
       if (tagline && taglines[currentIndex]) {
-        tagline.style.opacity = '0';
+        tagline.style.opacity = "0";
         setTimeout(() => {
           tagline.textContent = taglines[currentIndex];
-          tagline.style.opacity = '1';
+          tagline.style.opacity = "1";
         }, 250);
       }
     }
@@ -250,21 +253,21 @@
       }
     }
 
-    prevBtn?.addEventListener('click', (e) => {
+    prevBtn?.addEventListener("click", (e) => {
       e.preventDefault();
       showSlide(currentIndex - 1);
       startAutoplay();
     });
 
-    nextBtn?.addEventListener('click', (e) => {
+    nextBtn?.addEventListener("click", (e) => {
       e.preventDefault();
       showSlide(currentIndex + 1);
       startAutoplay();
     });
 
     // Pause on hover
-    heroSection?.addEventListener('mouseenter', stopAutoplay);
-    heroSection?.addEventListener('mouseleave', startAutoplay);
+    heroSection?.addEventListener("mouseenter", stopAutoplay);
+    heroSection?.addEventListener("mouseleave", startAutoplay);
 
     // Initial state
     showSlide(0);
@@ -273,5 +276,5 @@
 
   // Initialize on load and on client-side navigations
   initHeroSlider();
-  document.addEventListener('astro:page-load', initHeroSlider);
+  document.addEventListener("astro:page-load", initHeroSlider);
 </script>

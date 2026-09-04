@@ -13,7 +13,7 @@ const posts = Object.entries(rawPosts).map(([path, post]: [string, any]) => {
   <div class="mx-auto max-w-7xl">
     <!-- Encabezado -->
     <div
-      class="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-start lg:justify-between"
+      class="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-start lg:justify-between apple-reveal"
     >
       <span
         class="inline-block w-fit rounded-full border border-slate-300 px-4 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider"
@@ -31,8 +31,8 @@ const posts = Object.entries(rawPosts).map(([path, post]: [string, any]) => {
     <!-- Tarjetas de artículos (1 columna en móviles, 2 en tablets, 3 en escritorio) -->
     <div class="mt-8 sm:mt-12 md:mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
       {
-        posts.map((post) => (
-          <article class="rounded-3xl bg-slate-50 p-3 sm:p-3.5 shadow-xs hover:shadow-md transition-all border border-slate-100 flex flex-col justify-between">
+        posts.map((post, index) => (
+          <article class={`rounded-3xl bg-slate-50 p-3 sm:p-3.5 shadow-xs border border-slate-100 flex flex-col justify-between apple-reveal apple-card ${index === 0 ? '' : index === 1 ? 'apple-delay-1' : index === 2 ? 'apple-delay-2' : 'apple-delay-3'}`}>
             <div>
               <a href={`/blog/${post.slug}`} class="block relative overflow-hidden rounded-2xl group">
                 <img
@@ -106,7 +106,7 @@ const posts = Object.entries(rawPosts).map(([path, post]: [string, any]) => {
     </div>
 
     <!-- Botón inferior -->
-    <div class="mt-10 sm:mt-14 flex justify-center">
+    <div class="mt-10 sm:mt-14 flex justify-center apple-reveal apple-delay-3">
       <a
         href="/blog"
         class="inline-flex items-center gap-3 sm:gap-4 rounded-full bg-[#0D214B] py-2 sm:py-2.5 pl-6 sm:pl-7 pr-2 text-sm sm:text-base font-semibold text-white shadow-md transition-all hover:scale-[1.02] active:scale-95 hover:bg-[#1a3875]"

@@ -11,33 +11,43 @@
     id="inicio"
     class="relative w-full h-full overflow-hidden rounded-[22px] sm:rounded-[34px] md:rounded-[40px] bg-slate-900 flex flex-col justify-between p-4 sm:p-7 md:p-10 lg:p-12 shadow-sm"
   >
-    <!-- Background image -->
-    <div class="absolute inset-0 z-0 pointer-events-none">
+    <!-- Background images carousel -->
+    <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+      <!-- Slide 1 -->
       <img
         src="/images/imagen-hero.webp"
-        alt="Odontología Alexis Torres"
-        class="h-full w-full object-cover object-[65%_center] sm:object-[62%_center]"
+        alt="Atención dental profesional - Od. Alexis Torres"
+        class="hero-bg-slide absolute inset-0 h-full w-full object-cover object-[65%_center] sm:object-[62%_center] transition-opacity duration-1000 ease-in-out opacity-100"
+      />
+      <!-- Slide 2 -->
+      <img
+        src="/images/imagen-hero-2.webp"
+        alt="Diagnóstico radiográfico y tecnología - Od. Alexis Torres"
+        class="hero-bg-slide absolute inset-0 h-full w-full object-cover object-[60%_center] sm:object-[55%_center] transition-opacity duration-1000 ease-in-out opacity-0"
       />
       <!-- Gradient overlays for maximum text and badge legibility -->
       <div
-        class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-slate-950/30 sm:from-slate-950/90 sm:via-slate-900/40 sm:to-transparent"
+        class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-slate-950/30 sm:from-slate-950/90 sm:via-slate-900/40 sm:to-transparent z-10"
       >
       </div>
       <div
-        class="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/20 to-slate-950/40"
+        class="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/20 to-slate-950/40 z-10"
       >
       </div>
     </div>
 
     <!-- Top spacer matching fixed header height so content never collides -->
-    <div class="h-16 sm:h-20 w-full pointer-events-none" aria-hidden="true"></div>
+    <div class="h-16 sm:h-20 w-full pointer-events-none" aria-hidden="true">
+    </div>
 
     <!-- Main Content Area -->
     <div
       class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 my-auto pt-2 sm:pt-4 pb-2 sm:pb-4 items-end"
     >
       <!-- Left Column: Headline, subtext, CTA -->
-      <div class="lg:col-span-7 flex flex-col justify-end space-y-4 sm:space-y-6">
+      <div
+        class="lg:col-span-7 flex flex-col justify-end space-y-4 sm:space-y-6 apple-reveal"
+      >
         <div class="max-w-xl">
           <h1
             class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.08] sm:leading-[1.06] text-white tracking-tight"
@@ -48,7 +58,8 @@
           <p
             class="mt-3 sm:mt-6 max-w-sm text-xs sm:text-base leading-relaxed text-white/80"
           >
-            Soluciones dentales naturales para recuperar piezas perdidas y devolver salud y confianza a tu sonrisa.
+            Soluciones dentales naturales para recuperar piezas perdidas y
+            devolver salud y confianza a tu sonrisa.
           </p>
 
           <a
@@ -79,7 +90,7 @@
 
       <!-- Right Column: Floating Pill Tags over Patient Smile -->
       <div
-        class="lg:col-span-5 flex flex-col items-start lg:items-end justify-end space-y-2 sm:space-y-3 lg:mb-4"
+        class="lg:col-span-5 flex flex-col items-start lg:items-end justify-end space-y-2 sm:space-y-3 lg:mb-4 apple-reveal apple-delay-2"
       >
         <div class="flex flex-wrap lg:justify-end gap-2 sm:gap-2.5">
           <span
@@ -114,16 +125,25 @@
     </div>
 
     <!-- Bottom Bar inside Hero Card -->
-    <div class="relative z-10 w-full border-t border-white/15 pt-3 sm:pt-4 mt-auto">
+    <div
+      class="relative z-10 w-full border-t border-white/15 pt-3 sm:pt-4 mt-auto apple-reveal apple-delay-3"
+    >
       <div
         class="flex items-center justify-between gap-3 text-xs sm:text-sm text-white/80"
       >
         <!-- Left: progress bar line + tag -->
         <div class="flex flex-col gap-1 w-32 sm:w-60">
           <div class="h-0.5 w-full bg-white/20 rounded-full overflow-hidden">
-            <div class="h-full w-2/3 bg-white rounded-full"></div>
+            <div
+              id="hero-progress"
+              class="h-full w-1/2 bg-white rounded-full transition-all duration-700 ease-out"
+            >
+            </div>
           </div>
-          <span class="text-[11px] sm:text-xs text-white/70 tracking-wide truncate">
+          <span
+            id="hero-tagline"
+            class="text-[11px] sm:text-xs text-white/70 tracking-wide truncate transition-opacity duration-300"
+          >
             Tu sonrisa, nuestra ciencia
           </span>
         </div>
@@ -131,15 +151,23 @@
         <!-- Center: pagination buttons -->
         <div class="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
           <button
+            id="hero-prev"
             type="button"
-            class="hover:text-white transition-colors cursor-pointer text-xs sm:text-sm"
+            aria-label="Imagen anterior"
+            class="hover:text-white transition-colors cursor-pointer text-xs sm:text-sm select-none"
           >
             Anterior
           </button>
-          <span class="font-semibold text-white px-1 text-xs sm:text-sm">01 / 08</span>
+          <span
+            id="hero-counter"
+            class="font-semibold text-white px-1 text-xs sm:text-sm tabular-nums"
+            >01 / 02</span
+          >
           <button
+            id="hero-next"
             type="button"
-            class="hover:text-white transition-colors cursor-pointer text-xs sm:text-sm"
+            aria-label="Siguiente imagen"
+            class="hover:text-white transition-colors cursor-pointer text-xs sm:text-sm select-none"
           >
             Siguiente
           </button>
@@ -153,3 +181,97 @@
     </div>
   </section>
 </div>
+
+<script>
+  function initHeroSlider() {
+    const slides = document.querySelectorAll<HTMLImageElement>('.hero-bg-slide');
+    const prevBtn = document.getElementById('hero-prev');
+    const nextBtn = document.getElementById('hero-next');
+    const counter = document.getElementById('hero-counter');
+    const progress = document.getElementById('hero-progress');
+    const tagline = document.getElementById('hero-tagline');
+    const heroSection = document.getElementById('inicio');
+
+    if (!slides.length) return;
+
+    const taglines = [
+      'Tu sonrisa, nuestra ciencia',
+      'Diagnóstico y tecnología moderna'
+    ];
+
+    let currentIndex = 0;
+    const total = slides.length;
+    let autoplayTimer: ReturnType<typeof setInterval> | null = null;
+
+    function showSlide(index: number) {
+      currentIndex = (index + total) % total;
+
+      slides.forEach((slide, i) => {
+        if (i === currentIndex) {
+          slide.classList.remove('opacity-0');
+          slide.classList.add('opacity-100');
+        } else {
+          slide.classList.remove('opacity-100');
+          slide.classList.add('opacity-0');
+        }
+      });
+
+      if (counter) {
+        const currStr = String(currentIndex + 1).padStart(2, '0');
+        const totStr = String(total).padStart(2, '0');
+        counter.textContent = `${currStr} / ${totStr}`;
+      }
+
+      if (progress) {
+        const pct = ((currentIndex + 1) / total) * 100;
+        progress.style.width = `${pct}%`;
+      }
+
+      if (tagline && taglines[currentIndex]) {
+        tagline.style.opacity = '0';
+        setTimeout(() => {
+          tagline.textContent = taglines[currentIndex];
+          tagline.style.opacity = '1';
+        }, 250);
+      }
+    }
+
+    function startAutoplay() {
+      stopAutoplay();
+      autoplayTimer = setInterval(() => {
+        showSlide(currentIndex + 1);
+      }, 5500);
+    }
+
+    function stopAutoplay() {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+    }
+
+    prevBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      showSlide(currentIndex - 1);
+      startAutoplay();
+    });
+
+    nextBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      showSlide(currentIndex + 1);
+      startAutoplay();
+    });
+
+    // Pause on hover
+    heroSection?.addEventListener('mouseenter', stopAutoplay);
+    heroSection?.addEventListener('mouseleave', startAutoplay);
+
+    // Initial state
+    showSlide(0);
+    startAutoplay();
+  }
+
+  // Initialize on load and on client-side navigations
+  initHeroSlider();
+  document.addEventListener('astro:page-load', initHeroSlider);
+</script>

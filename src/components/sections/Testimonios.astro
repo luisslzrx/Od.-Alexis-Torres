@@ -39,7 +39,7 @@ const testimonials = [
       class="grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-[280px_1fr_auto] lg:gap-12 items-center"
     >
       <!-- Izquierda: insignia y foto del paciente -->
-      <div class="flex flex-col items-center sm:items-start text-center sm:text-left">
+      <div class="flex flex-col items-center sm:items-start text-center sm:text-left apple-reveal">
         <span
           class="inline-block w-fit rounded-full border border-slate-300 px-4 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider"
         >
@@ -47,7 +47,7 @@ const testimonials = [
         </span>
 
         <div class="mt-6 sm:mt-8 pt-2">
-          <div class="relative h-56 w-56 sm:h-64 sm:w-64 overflow-hidden rounded-3xl bg-slate-100 shadow-sm mx-auto sm:mx-0 border border-slate-100">
+          <div class="relative h-56 w-56 sm:h-64 sm:w-64 overflow-hidden rounded-3xl bg-slate-100 shadow-sm mx-auto sm:mx-0 border border-slate-100 apple-card">
             <img
               id="testimonial-image"
               src={testimonials[0].image}
@@ -65,7 +65,7 @@ const testimonials = [
       </div>
 
       <!-- Centro: cita y autor -->
-      <div id="testimonial-swipe-area" class="flex flex-col justify-center min-h-[220px] sm:min-h-[260px] cursor-grab active:cursor-grabbing">
+      <div id="testimonial-swipe-area" class="flex flex-col justify-center min-h-[220px] sm:min-h-[260px] cursor-grab active:cursor-grabbing apple-reveal apple-delay-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -106,7 +106,7 @@ const testimonials = [
       </div>
 
       <!-- Derecha: flechas de navegación -->
-      <div class="flex items-center justify-center sm:justify-start gap-3 self-center lg:self-center">
+      <div class="flex items-center justify-center sm:justify-start gap-3 self-center lg:self-center apple-reveal apple-delay-2">
         <button
           id="testimonial-prev"
           type="button"
